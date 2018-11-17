@@ -1,0 +1,212 @@
+.MODEL SMALL
+.STACK 100H
+
+.DATA
+	PROMPT1 DB 'Enter number of elements : $'
+	PROMPT2 DB 'Enter elements :',0DH,0AH,'$'
+	PROMPTMAX DB 'Maximum : $'
+	PROMPTMIN DB 'Minimum : $'
+	n_line DB 0DH,0AH,"$"
+	NUM DW ?
+	ARR DW 50 DUP(?)
+	MAX DW ?
+	MIN DW ?
+
+.CODE
+	MAIN PROC
+		MOV AX,@DATA
+		MOV DS,AX
+
+		LEA DX, PROMPT1
+		MOV AH,9
+		INT 21H
+
+		XOR BX,BX
+		MOV CL,4
+
+		MOV AH,1
+		INT 21H
+
+		INPUT1:
+			CMP AL,0DH
+			JE LINE1
+
+
+			CMP AL,39h
+			JG LETTER1
+
+			AND AL,0FH
+			JMP SHIFT1
+
+		LETTER1:
+			SUB AL,37H
+
+		SHIFT1:
+			SHL BX,CL
+			OR  BL,AL
+
+			INT 21h
+			JMP INPUT1
+		LINE1:
+			LEA SI,ARR
+			MOV NUM,BX
+			MOV CX,BX
+
+			LEA DX, PROMPT2
+			MOV AH,9
+			INT 21H
+
+		@ARR_INPUT:
+			XOR DX,DX
+			MOV AH,1
+			INT 21H
+
+		INPUT2:
+			CMP AL,0DH
+			JE LINE2
+
+			CMP AL,39h
+			JG LETTER2
+
+			AND AL,0FH
+			JMP SHIFT2
+
+		LETTER2:
+			SUB AL,37H
+
+		SHIFT2:
+			SHL DX,CL
+			OR  DL,AL
+
+			INT 21h
+			JMP INPUT2
+		LINE2:
+			MOV [SI],DX
+			ADD SI,2
+			LOOP @ARR_INPUT
+
+		LEA SI,ARR
+		MOV AX,BX
+		DEC AX
+		XOR BX,BX
+		XOR CX,CX
+		MOV BX,WORD PTR[SI]
+		MOV CX,WORD PTR[SI]
+		ADD SI,2
+
+		@MAXMIN:
+			CMP BX,WORD PTR[SI]
+			JG CNGMAX
+
+			CMP CX,WORD PTR[SI]
+			JL CNGMIN
+
+			JMP NEXT
+
+			CNGMAX:
+				MOV BX,WORD PTR[SI]
+				JMP NEXT
+
+			CNGMIN:
+				MOV CX,WORD PTR[SI]
+
+			NEXT:
+				ADD SI,2
+				DEC AX
+				JNZ @MAXMIN
+
+		@OUTMAX:
+			LEA DX,PROMPTMAX
+			MOV AH,9
+			INT 21H
+
+			MOV DH,BH
+			SHR DH,1
+			SHR DH,1
+			SHR DH,1
+			SHR DH,1
+			AND DH,0FH
+			ADD DH,'0'
+			MOV DL,DH
+			MOV AH,2
+			INT 21H
+
+			MOV DH,BH
+			AND DH,0FH
+			ADD DH,'0'
+			MOV DL,DH
+			MOV AH,2
+			INT 21H
+
+			MOV DH,BL
+			SHR DH,1
+			SHR DH,1
+			SHR DH,1
+			SHR DH,1
+			AND DH,0FH
+			ADD DH,'0'
+			MOV DL,DH
+			MOV AH,2
+			INT 21H
+
+			MOV DH,BL
+			AND DH,0FH
+			ADD DH,'0'
+			MOV DL,DH
+			MOV AH,2
+			INT 21H
+
+			LEA DX,n_line
+			MOV AH,9
+			INT 21H
+
+		@OUTMIN:
+			LEA DX,PROMPTMIN
+			MOV AH,9
+			INT 21H
+
+			MOV DH,CH
+			SHR DH,1
+			SHR DH,1
+			SHR DH,1
+			SHR DH,1
+			AND DH,0FH
+			ADD DH,'0'
+			MOV DL,DH
+			MOV AH,2
+			INT 21H
+
+			MOV DH,CH
+			AND DH,0FH
+			ADD DH,'0'
+			MOV DL,DH
+			MOV AH,2
+			INT 21H
+
+			MOV DH,CL
+			SHR DH,1
+			SHR DH,1
+			SHR DH,1
+			SHR DH,1
+			AND DH,0FH
+			ADD DH,'0'
+			MOV DL,DH
+			MOV AH,2
+			INT 21H
+
+			MOV DH,CL
+			AND DH,0FH
+			ADD DH,'0'
+			MOV DL,DH
+			MOV AH,2
+			INT 21H
+
+			LEA DX,n_line
+			MOV AH,9
+			INT 21H
+
+		EXIT:
+			MOV AH,4CH
+			INT 21H
+	MAIN ENDP
+END MAIN

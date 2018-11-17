@@ -1,0 +1,44 @@
+.MODEL SMALL
+.STACK 100H
+
+.DATA
+	PROMPT1 DB 'Looping! Press n to stop : $'
+	PROMPT2 DB 'EXITING!$'
+
+.CODE
+	MAIN PROC
+		MOV AX,@DATA
+		MOV DS,AX
+
+		@LOOP:
+			MOV AH,2
+			MOV DL,0DH
+			INT 21H
+
+			MOV DL,0AH
+			INT 21H
+
+			LEA DX, PROMPT1
+			MOV AH,9
+			INT 21H
+
+			MOV AH,1		
+			INT 21H
+			CMP AL,'n'
+			JNE @LOOP
+
+		MOV AH,2
+		MOV DL,0DH
+		INT 21H
+
+		MOV DL,0AH
+		INT 21H
+
+		LEA DX, PROMPT2
+		MOV AH,9
+		INT 21H
+
+		MOV AH,4CH
+		INT 21H
+	MAIN ENDP
+END MAIN
